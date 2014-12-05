@@ -13,15 +13,13 @@
 ###
 FROM ubuntu
 
+VOLUME /opt/fossil
+
 ### Now install some additional parts we will need for the build
 RUN apt-get update -y  && apt-get clean all
 RUN apt-get install -y fossil && apt-get clean all
 
 RUN groupadd -r fossil -g 433 && useradd -u 431 -r -g fossil -d /opt/fossil -s /sbin/nologin -c "Fossil user" fossil
-
-VOLUME /opt/fossil
-
-RUN mkdir -p /opt/fossil
 RUN chown fossil:fossil /opt/fossil
 
 USER fossil
