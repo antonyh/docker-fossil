@@ -7,30 +7,26 @@
 #   server ID and project ID.
 #
 # This is a fork of nijtmans/fossil, changed to use ubuntu & apt-get
-# and with a VOLUME directive to persist data.
 # The fossil commands have also been changed to work with v1.27
 #
 ###
 FROM ubuntu
+RUN apt-get update -y && apt-get clean all
 
-VOLUME /opt/fossil
-
-### Now install some additional parts we will need for the build
-RUN apt-get update -y  && apt-get clean all
+RUN mkdir /data
 RUN apt-get install -y fossil && apt-get clean all
-
-RUN groupadd -r fossil -g 433 && useradd -u 431 -r -g fossil -d /opt/fossil -s /sbin/nologin -c "Fossil user" fossil
-RUN chown fossil:fossil /opt/fossil
+RUN groupadd -r fossil -g 433 && useradd -u 431 -r -g fossil -d /data -s /sbin/nologin -c "Fossil user" fossil
+RUN chown -R fossil:fossil /data
 
 USER fossil
+WORKDIR /data
+ENV HOME /data
 
-ENV HOME /opt/fossil
-
-RUN fossil new -A admin /opt/fossil/fossil.fossil
-RUN fossil user password -R /opt/fossil/fossil.fossil admin admin
-#RUN fossil cache init -R /opt/fossil/fossil.fossil
+RUN fossil new -A admin /data/fossil.fossil
+RUN fossil user password -R /data/fossil.fossil admin admin
+#RUN fossil cache init -R /data/fossil.fossil
 
 EXPOSE 8080
-
-CMD ["/usr/bin/fossil", "server", "/opt/fossil/fossil.fossil"]
+VOLUME ["/data"]
+CMD ["/usr/bin/fossil", "server", "/data/fossil.fossil"]
 
